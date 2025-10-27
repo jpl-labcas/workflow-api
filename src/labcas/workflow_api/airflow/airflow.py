@@ -1,5 +1,4 @@
 import requests
-from requests.auth import HTTPBasicAuth
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,13 +18,11 @@ class AirflowClient:
             token = self.__get_jwt_token()
             self.request_kwargs = {"headers": {"Authorization": f"Bearer {token}"}}
 
-
     def __ui_login(self):
         url = f"{self.airflow_baseurl}/login"
         response = self.session.post(url, data={"username": self.username, "password": self.password})
         logger.info(response.status_code)
         logger.info(f"Response: {response.text}")
-
 
     def __get_jwt_token(self):
         url = f"{self.airflow_baseurl}/api/v1/auth/login"

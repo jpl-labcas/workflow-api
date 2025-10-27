@@ -8,8 +8,7 @@ from session_info import get_session_info
 
 logging.basicConfig(level=logging.INFO)
 
-
-def list_dags(region, env_name):
+def trigger_dag(region, env_name, dag_name):
     """
     Triggers a DAG in a specified MWAA environment using the Airflow REST API.
 
@@ -19,7 +18,7 @@ def list_dags(region, env_name):
     dag_name (str): Name of the DAG to trigger.
     """
 
-    logging.info(f"Attempting to list DAGs in environment {env_name} at region {region}")
+    logging.info(f"Attempting to trigger DAG {dag_name} in environment {env_name} at region {region}")
 
     # Retrieve the web server hostname and session cookie for authentication
     try:
@@ -36,28 +35,33 @@ def list_dags(region, env_name):
     json_body = {"conf": {}}
 
     # Construct the URL for triggering the DAG
-    url = f"https://{web_server_host_name}/api/v1/dags"
+    url = f"https://{web_server_host_name}/api/v1/dags/{dag_name}/dagRuns"
 
     # Send the POST request to trigger the DAG
     try:
-        response = requests.get(url, cookies=cookies)
+        response = requests.post(url, cookies=cookies, json=json_body)
         # Check the response status code to determine if the DAG was triggered successfully
         if response.status_code == 200:
-            logging.info("DAGs listed successfully.")
+            logging.info("DAG triggered successfully.")
             return response.json()
         else:
-            logging.error(f"Failed to list DAGs: HTTP {response.status_code} - {response.text}")
+            logging.error(f"Failed to trigger DAG: HTTP {response.status_code} - {response.text}")
     except requests.RequestException as e:
-        logging.error(f"Request to list DAGs failed: {str(e)}")
-
+        logging.error(f"Request to trigger DAG failed: {str(e)}")
 
 def lambda_handler(event, context):
     mwaa_env_name = 'edrn-dev-airflow'  # <-- Change this
     region = "us-west-2"
+    dag_name = event.get("body", {}).get("workflow_id")
+    dag_params = event.get("body", {}).get("params")
 
-    # list the DAGs with the provided arguments
-    dag_list = list_dags(region, mwaa_env_name)["dags"]
+    # Trigger the DAG with the provided arguments
+    response = trigger_dag(region, mwaa_env_name, dag_name)
 
-    # format response
-    workflows = [dict(id=dag["dag_id"], description=dag["description"]) for dag in dag_list]
-    return dict(workflows=workflows)
+    return {
+        "statusCode": 201,
+        "body": {
+            "run_id": response['dag_run_id'],
+            "state": response['state']
+        }
+    }

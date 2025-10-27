@@ -1,0 +1,8 @@
+collections:
+    - nebraska_images:
+        bucket: edrn-data
+        prefix: nebraska_images/
+        workflows:
+            - nebraska:
+                 authorized_users:
+                   - thomas
