@@ -3,10 +3,17 @@
 A RESTFul API for managing LabCas workflows.
 
 This comes in 2 implementations:
- - A Flask-based REST API service
+ - A Flask-based REST API service (obsolete)
  - An AWS API gateway + lambda 
 
 # API gateway + lambda
+
+## Create the API gateway
+
+Use the AWS console to create a new API gateway (REST API).
+
+Import the file `./docs/openapi.yml` to create the API structure.
+
 
 ## Lambda deployment:
 
@@ -23,10 +30,28 @@ Package it as follows:
 Upload the zip file as a layer in the AWS console.
 
 
+### Lambda functions
 
 
 
 
+
+## Generate doc manually
+
+
+     pip install -e '.[dev]'
+     cd docs
+     make html
+
+Test the web site created:
+
+    cd _build/html
+    python -m http.server 8000
+
+Use your browser to go to `http://localhost:8000` and check the documentation.
+
+
+        open build/html/index.htm
 
 
 
