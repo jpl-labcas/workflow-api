@@ -6,6 +6,10 @@ This comes in 2 implementations:
  - A Flask-based REST API service (obsolete)
  - An AWS API gateway + lambda 
 
+# Reference specification
+
+The reference OpenAPI specification is in the file `./docs/openapi.yml`.
+
 # API gateway + lambda
 
 ## Create the API gateway
@@ -41,6 +45,7 @@ Upload the zip file as a layer in the AWS console.
 
      pip install -e '.[dev]'
      cd docs
+     cp openapi.yml _build/html/_static
      make html
 
 Test the web site created:
@@ -51,7 +56,7 @@ Test the web site created:
 Use your browser to go to `http://localhost:8000` and check the documentation.
 
 
-        open build/html/index.htm
+
 
 
 
