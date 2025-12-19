@@ -11,7 +11,8 @@ release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    'swagger_plugin_for_sphinx'
+    'swagger_plugin_for_sphinx',
+    'sphinxcontrib.mermaid',
 ]
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
