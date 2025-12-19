@@ -9,7 +9,9 @@ Welcome to the workflow-api documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   openapi
+   install
+   use
+
 
 
 Indices and tables

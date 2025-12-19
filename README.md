@@ -37,7 +37,13 @@ Upload the zip file as a layer in the AWS console.
 ### Lambda functions
 
 
+To Be Completed
 
+## Test the API
+
+A demo UI is provided to demonstrate the API features.
+
+Follow instructions in the (workflow-api-client-demo repository)[https://github.com/jpl-labcas/workflow-api-client-demo]
 
 
 ## Generate doc manually
@@ -45,7 +51,6 @@ Upload the zip file as a layer in the AWS console.
 
      pip install -e '.[dev]'
      cd docs
-     cp openapi.yml _build/html/_static
      make html
 
 Test the web site created:
