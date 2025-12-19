@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installation &#8212; workflow-api 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="use.html" />
+    <link rel="prev" title="Welcome to the workflow-api documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>This section describes how to install the LabCas Workflow API on AWS.</p>
+<p>LabCas Workflows is meant to be installed on an Amazon Web Service account.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>What you need to install LabCas Workflows is:</p>
+<ul class="simple">
+<li><p>System administrator support to comply with the security constraints defined by your organization.</p></li>
+<li><p>An AWS account with a VPC and private subnets</p></li>
+</ul>
+<p>Some knowledge of the AWS console and AWS CLI is helpful.</p>
+</section>
+<section id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Link to this heading">¶</a></h2>
+<p>The LabCas workflow API is a sub-component of the <a class="reference external" href="https://jpl-labcas.github.io/workflows/">LabCas Workflows documentation</a> system, which relies on several AWS services to function properly.</p>
+<p>See the architecture diagram in the <a class="reference external" href="https://jpl-labcas.github.io/workflows/install.html#architecture-overview">LabCas Workflows documentation</a> for more details on the high level architecture.</p>
+<p>The API component is responsible for handling RESTFul API requests, managing workflow definitions, and orchestrating workflow executions. It interacts with other components such as the workflow engine (e.g., Apache Airflow) and storage services (e.g., S3 buckets) by providing logical access (workflows, datasets) to the users according to their authorizations and without exposing the actual infrastructure (workflow engine, computing resources, storage).</p>
+<p>The API is deployed as an AWS/API Gateway. Each API endpoint correspond to specific functions implemented with AWS/Lambda functions that process the requests and interact with other AWS services as needed.</p>
+<pre  class="mermaid">
+        graph TD
+  subgraph LabCas API
+    F[AWS API Gateway]
+    J[Authorizer Lambda]
+    K[Implementation Lambda Functions]
+    F --&gt; J
+    F --&gt; K
+  end
+  subgraph LabCas Workflows
+    G[Workflow_Engine_Airflow]
+    H[(DAG_S3_bucket)]
+    I[(Staging_S3_bucket)]
+    K --&gt; G
+    K --&gt; I
+    G --&gt; H
+    G --&gt; I
+  end
+    </pre></section>
+<section id="doing-the-installation">
+<h2>Doing the Installation<a class="headerlink" href="#doing-the-installation" title="Link to this heading">¶</a></h2>
+<section id="create-the-implementation-lambda-functions">
+<h3>Create the implementation lambda functions<a class="headerlink" href="#create-the-implementation-lambda-functions" title="Link to this heading">¶</a></h3>
+</section>
+<section id="create-the-api-gateway">
+<h3>Create the API Gateway<a class="headerlink" href="#create-the-api-gateway" title="Link to this heading">¶</a></h3>
+<p>The API gateway is</p>
+<p>Create the authorizer Lambda function</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">workflow-api</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#doing-the-installation">Doing the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to the workflow-api documentation!</a></li>
+      <li>Next: <a href="use.html" title="next chapter">Usage</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Caltech.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/install.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
