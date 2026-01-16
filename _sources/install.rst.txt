@@ -55,7 +55,7 @@ Create the implementation lambda functions
 -------------------------------------------
 
 Parameters
-~~~~~~~~~~
+^^^^^^^^^^^
 
 Create a parameter in the Parameter Store of the AWS System Manager, with reference name ``/labcas/workflow/api/config``:
 
@@ -75,7 +75,7 @@ The YAML content is as follows (update the values as needed)::
           ...
 
 lambda role
-~~~~~~~~~~
+^^^^^^^^^^^
 
 Create an IAM role for the lambda functions with the following policies:
 
@@ -87,12 +87,12 @@ Create an IAM role for the lambda functions with the following policies:
   - Systems Manager Limited on dedicated config parameter: Read
 
 Layer
-~~~~~~~~~~
+^^^^^^^^^^^
 
-Layer deployment is part of the terraform deployment of the lambda functions.
+Layer deployment is part of the terraform deployment of the lambda functions, so the following sub-section is optional.
 
 Manual layer deployment
-++++++++++++++++++++++++
+```````````````````````
 
 A layer is a lambda component containing re-usable functions. We use it for the code helping to connect to the restful API.
 
@@ -107,7 +107,7 @@ Package it as follows::
 Upload the zip file as a layer in the AWS console.
 
 Lambda functions
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 Terraform is used to deploy the lambda functions.
 
