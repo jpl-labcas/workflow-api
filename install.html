@@ -84,10 +84,87 @@ window.addEventListener("load", () => mermaid.run());
 <section id="create-the-implementation-lambda-functions">
 <h3>Create the implementation lambda functions<a class="headerlink" href="#create-the-implementation-lambda-functions" title="Link to this heading">¶</a></h3>
 </section>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<p>Create a parameter in the Parameter Store of the AWS System Manager, with reference name <code class="docutils literal notranslate"><span class="pre">/labcas/workflow/api/config</span></code>:</p>
+<p>The YAML content is as follows (update the values as needed):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collections</span><span class="p">:</span>
+    <span class="p">{</span><span class="n">archive</span> <span class="n">dataset</span> <span class="n">name</span> <span class="mi">1</span><span class="p">}:</span>
+        <span class="n">bucket</span><span class="p">:</span> <span class="p">{</span><span class="n">s3</span> <span class="n">bucket</span> <span class="n">where</span> <span class="n">the</span>  <span class="n">data</span> <span class="ow">is</span> <span class="n">stored</span><span class="p">}</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="p">{</span><span class="n">s3</span> <span class="n">prefix</span> <span class="n">where</span> <span class="n">the</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">stored</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">above</span> <span class="n">bucket</span><span class="p">}</span><span class="o">/</span>
+        <span class="n">workflows</span><span class="p">:</span>
+            <span class="p">{</span><span class="nb">id</span> <span class="n">of</span> <span class="n">a</span> <span class="n">deployed</span> <span class="n">airflow</span> <span class="n">workflow</span> <span class="p">(</span><span class="n">aka</span> <span class="n">DAG</span><span class="p">)}:</span>
+               <span class="n">authorized_users</span><span class="p">:</span>
+                  <span class="o">-</span> <span class="p">{</span><span class="n">authorized</span> <span class="n">user</span> <span class="mi">1</span><span class="p">,</span> <span class="n">using</span> <span class="n">labcas</span> <span class="n">authentication</span><span class="p">}</span>
+                  <span class="o">-</span> <span class="p">{</span><span class="n">authorized</span> <span class="n">user</span> <span class="mi">2</span><span class="p">,</span> <span class="n">using</span> <span class="n">labcas</span> <span class="n">authentication</span><span class="p">}</span>
+                  <span class="o">-</span> <span class="o">...</span>
+    <span class="p">{</span><span class="n">archive</span> <span class="n">dataset</span> <span class="n">name</span> <span class="mi">1</span><span class="p">}:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="lambda-role">
+<h2>lambda role<a class="headerlink" href="#lambda-role" title="Link to this heading">¶</a></h2>
+<p>Create an IAM role for the lambda functions with the following policies:</p>
+<ul class="simple">
+<li><p>AWSLambdaBasicExecutionRole</p></li>
+<li><p>AWSLambdaVPCAccessExecutionRole</p></li>
+<li><p>And a specific policy to access:
+- MWAA Full: Read Limited: Write
+- S3 Limited to the staging bucket and archive bucket: List, Read, Write
+- Systems Manager Limited on dedicated config parameter: Read</p></li>
+</ul>
+</section>
+<section id="layer">
+<h2>Layer<a class="headerlink" href="#layer" title="Link to this heading">¶</a></h2>
+<p>Layer deployment is part of the terraform deployment of the lambda functions.</p>
+<p>A layer is a lambda component containing re-usable functions. We use it for the code helping to connect to the restful API.</p>
+<p>Package it as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">./</span><span class="n">terraform</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span><span class="o">/</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">fr</span> <span class="n">build</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">t</span> <span class="n">src</span><span class="o">/</span><span class="n">layer</span><span class="o">/</span><span class="n">python</span>
+<span class="n">cd</span> <span class="n">src</span><span class="o">/</span><span class="n">layer</span><span class="o">/</span><span class="n">python</span>
+<span class="nb">zip</span> <span class="o">-</span><span class="n">r</span> <span class="n">labcas</span><span class="o">-</span><span class="n">mwaa</span><span class="o">-</span><span class="n">restful</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">connection</span><span class="o">.</span><span class="n">zip</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>Upload the zip file as a layer in the AWS console.</p>
+</section>
+<section id="lambda-functions">
+<h2>Lambda functions<a class="headerlink" href="#lambda-functions" title="Link to this heading">¶</a></h2>
+<p>Terraform is used to deploy the lambda functions.</p>
+<p>Create your deployment environment directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">terraform</span><span class="o">/</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span>
+</pre></div>
+</div>
+<p>Create a terraform state configuration file <code class="docutils literal notranslate"><span class="pre">terraform/environments/your_tenant_your_venue_dev/terraform.tfvars</span></code> with content similar to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Terraform backend configuration for remote state</span>
+<span class="n">bucket</span> <span class="o">=</span> <span class="s2">&quot;&lt;an S3 bucket for your terraform state&gt;&quot;</span>
+<span class="n">key</span>    <span class="o">=</span> <span class="s2">&quot;labcas.tfstate&quot;</span>
+<span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;&lt;your AWS regision, e.g. us-west-1&gt;&quot;</span>
+</pre></div>
+</div>
+<p>Create a variables file for your deployment configuration in a local file <code class="docutils literal notranslate"><span class="pre">terraform/environments/your_tenant_your_venue_dev/variables.tfvars</span></code> with content similar to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">maturity</span><span class="o">=</span><span class="p">{</span><span class="n">Maturity</span> <span class="n">level</span> <span class="n">of</span> <span class="n">the</span> <span class="n">deployment</span> <span class="p">(</span><span class="n">poc</span><span class="p">:</span> <span class="n">aws</span> <span class="n">console</span> <span class="n">exploration</span><span class="p">,</span> <span class="n">iac</span><span class="p">:</span> <span class="n">terraform</span> <span class="n">deployment</span><span class="p">,</span> <span class="n">ops</span><span class="p">:</span> <span class="n">full</span> <span class="n">automation</span> <span class="k">with</span> <span class="n">CICD</span> <span class="ow">or</span> <span class="n">SA</span> <span class="n">documented</span> <span class="n">procedures</span><span class="p">)}</span>
+<span class="n">stage</span><span class="o">=</span><span class="p">{</span><span class="n">name</span> <span class="n">of</span> <span class="n">a</span> <span class="n">API</span> <span class="n">deployment</span><span class="p">,</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">AWS</span> <span class="n">API</span> <span class="n">gateway</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">dev</span><span class="p">}</span>
+<span class="n">lambda_role_arn</span><span class="o">=</span><span class="p">{</span><span class="k">lambda</span> <span class="n">AM</span> <span class="n">role</span> <span class="n">defined</span> <span class="n">above</span><span class="p">}</span>
+<span class="n">aws_region</span><span class="o">=</span><span class="p">{</span><span class="n">your</span> <span class="n">AWS</span> <span class="n">regision</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">us</span><span class="o">-</span><span class="n">west</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<span class="n">aws_profile</span><span class="o">=</span><span class="p">{</span><span class="n">you</span> <span class="n">AWS</span> <span class="n">CLI</span> <span class="n">profile</span> <span class="n">to</span> <span class="n">use</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Maturity aims at avoid naming conflict between different maturity of deployment in the same AWS account.
+The AWS resources created with the terraform script provided contains the chosen maturity value (poc, iac, ops).
+All those value can be used in a dev venue, only the ops or iac can be used in production venues.</p>
+<p>Deploy the lambda functions with terraform:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">terraform</span><span class="o">/</span><span class="n">application</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span>
+<span class="n">terraform</span> <span class="n">init</span> <span class="o">-</span><span class="n">backend</span><span class="o">-</span><span class="n">config</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">terraform</span><span class="o">.</span><span class="n">tfvars</span>
+<span class="n">terraform</span> <span class="n">validate</span>
+<span class="n">terraform</span> <span class="n">plan</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
+<span class="n">terraform</span> <span class="n">apply</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
+</pre></div>
+</div>
 <section id="create-the-api-gateway">
 <h3>Create the API Gateway<a class="headerlink" href="#create-the-api-gateway" title="Link to this heading">¶</a></h3>
-<p>The API gateway is</p>
-<p>Create the authorizer Lambda function</p>
 </section>
 </section>
 </section>
@@ -124,6 +201,10 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#doing-the-installation">Doing the Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lambda-role">lambda role</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#layer">Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lambda-functions">Lambda functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
