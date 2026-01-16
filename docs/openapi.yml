@@ -1,0 +1,461 @@
+openapi: 3.0.3
+info:
+  title: Science Workflow Execution API
+  version: 1.0.0
+  description: REST API to list, describe, trigger, and monitor scientific workflows.
+paths:
+  /data-selections:
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    get:
+      summary: Get data-selections on which workflows can be applied
+      description: Not implemented. Get data-selections authorized for the current user to run workflows on them, using its JWT token to identify the user.
+      responses:
+        '200':
+          description: A list of available data-selections (datasets, collections, custom lists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "nebraska_images"
+                        description:
+                          type: string
+                          example: "This dataset is a predefined list of images on which to run the nebrasla workflow"
+      security:
+        - labcas-workflow-authorizer: [ ]
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-notimplemented/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+        type: aws_proxy
+
+  /data-selections/workflows:
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    get:
+      summary: Get workflows applicable for a given collection
+      description: Get workflows applicable for a given collection or dataset and authorized for the current user, using its JWT token to identify the user.
+      parameters:
+        # we make it a request parameter to support data_id with / in it as for example `NucliDetectorTestSet/TestPANC001`
+        - in: query
+          name: data_id
+          required: true
+          schema:
+            type: string
+            description: The data collection or dataset ID
+      responses:
+        '200':
+          description: A list of available workflows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "my_workflow"
+                        description:
+                          type: string
+                          example: "This workflow processes satellite imagery."
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowlist/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+        type: aws_proxy
+  /workflows:
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    get:
+      summary: List available workflows
+      description: List IDs and descriptions for the available workflows.
+      responses:
+        '200':
+          description: A list of available workflows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "my_workflow"
+                        description:
+                          type: string
+                          example: "This workflow processes satellite imagery."
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowlist/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+        type: aws_proxy
+
+  /workflows/{id}:
+    parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The workflow ID
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    get:
+      summary: Get workflow description
+      description: Get the detailed description of a workflow.
+      responses:
+        '200':
+          description: Workflow details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  description:
+                    type: string
+                  parameters:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  schedule:
+                    type: string
+                    nullable: true
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowinfo/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        type: aws_proxy
+        requestParameters:
+          integration.request.path.id: method.request.path.id
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+
+  /workflows/{id}/runs:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: The workflow ID
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    post:
+      summary: Trigger a workflow run
+      description: Trigger a new run of a specified workflow with parameters.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - workflow_id
+              properties:
+                workflow_id:
+                  type: string
+                params:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Workflow run started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [ queued, running, success, failed ]
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-createrun/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        type: aws_proxy
+        requestParameters:
+          integration.request.path.id: method.request.path.id
+        requestTemplates:
+          application/json: |
+            $input.body
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+    get:
+      summary: Get workflow's runs
+      description: Get the list of runs for a workflow
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The workflow ID
+      responses:
+        '200':
+          description: Workflow runs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        run_id:
+                          type: string
+                          example: "manual__2025-04-03T19:11:12.825218+00:00"
+                          description: "run identifier"
+                        workflow_id:
+                          type: string
+                          example: "nebraska"
+                          description: "workflow identifier"
+                        status:
+                          type: string
+                          example: "queued"
+                          description: "run status, queued, failed..."
+                        start_time:
+                          type: string
+                          example: "2025-04-03T19:11:14.157806+00:00"
+                          description: "start time of the run"
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-listruns/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        type: aws_proxy
+        requestParameters:
+          integration.request.path.id: method.request.path.id
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+
+  /output-data/{prefix}:
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+        description: the path explored
+    options:
+      summary: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CORSResponse'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'$stageVariables.allowedOrigin'"
+    get:
+      summary: Get workflows output for a given user
+      description: Shows the data results of the workflows, using JWT token to figure the current user.
+      responses:
+        '200':
+          description: Workflow output data
+          content:
+            text/html:
+              schema:
+                type: object
+            application/json:
+              schema:
+                type: object
+
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-browse-outputs/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        type: aws_proxy
+        requestParameters:
+          integration.request.path.prefix: method.request.path.prefix
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+    put:
+      summary: Updates the staged data's metadata
+      description: add metadata parameters to the data files produced.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Invalid request body or parameters
+      security:
+        - labcas-workflow-authorizer: []
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-update-outputs/invocations
+        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        httpMethod: POST
+        type: aws_proxy
+        requestParameters:
+          integration.request.path.prefix: method.request.path.prefix
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+
+
+
+components:
+  responses:
+    CORSResponse:
+      description: CORS preflight response
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+
+  securitySchemes:
+     labcas-workflow-authorizer :
+        type: "apiKey"
+        name: "Unused"
+        in: "header"
+        x-amazon-apigateway-authtype: "custom"
+        x-amazon-apigateway-authorizer:
+          type: "request"
+          authorizerUri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-authorizer/invocations
+          authorizerCredentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+          authorizerResultTtlInSeconds: 0
+          identitySource: "method.request.header.Authorization"
+
+
+
+
