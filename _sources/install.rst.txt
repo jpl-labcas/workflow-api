@@ -149,6 +149,23 @@ Deploy the lambda functions with terraform::
 Create the API Gateway
 -----------------------
 
+Deploy the API Gateway
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the AWS console to create a new API gateway (REST API).
+
+Import the file `./docs/openapi.yml` to create the API structure.
+
+This will connect the API endpoints to the lambda functions created above.
+
+
+Test the API
+^^^^^^^^^^^^^
+
+A demo UI is provided to demonstrate the API features.
+
+Follow instructions in the (workflow-api-client-demo repository)[https://github.com/jpl-labcas/workflow-api-client-demo]
+
 
 
 
