@@ -83,10 +83,8 @@ window.addEventListener("load", () => mermaid.run());
 <h2>Doing the Installation<a class="headerlink" href="#doing-the-installation" title="Link to this heading">¶</a></h2>
 <section id="create-the-implementation-lambda-functions">
 <h3>Create the implementation lambda functions<a class="headerlink" href="#create-the-implementation-lambda-functions" title="Link to this heading">¶</a></h3>
-</section>
-</section>
 <section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<h4>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h4>
 <p>Create a parameter in the Parameter Store of the AWS System Manager, with reference name <code class="docutils literal notranslate"><span class="pre">/labcas/workflow/api/config</span></code>:</p>
 <p>The YAML content is as follows (update the values as needed):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collections</span><span class="p">:</span>
@@ -105,7 +103,7 @@ window.addEventListener("load", () => mermaid.run());
 </div>
 </section>
 <section id="lambda-role">
-<h2>lambda role<a class="headerlink" href="#lambda-role" title="Link to this heading">¶</a></h2>
+<h4>lambda role<a class="headerlink" href="#lambda-role" title="Link to this heading">¶</a></h4>
 <p>Create an IAM role for the lambda functions with the following policies:</p>
 <ul class="simple">
 <li><p>AWSLambdaBasicExecutionRole</p></li>
@@ -117,8 +115,10 @@ window.addEventListener("load", () => mermaid.run());
 </ul>
 </section>
 <section id="layer">
-<h2>Layer<a class="headerlink" href="#layer" title="Link to this heading">¶</a></h2>
-<p>Layer deployment is part of the terraform deployment of the lambda functions.</p>
+<h4>Layer<a class="headerlink" href="#layer" title="Link to this heading">¶</a></h4>
+<p>Layer deployment is part of the terraform deployment of the lambda functions, so the following sub-section is optional.</p>
+<section id="manual-layer-deployment">
+<h5>Manual layer deployment<a class="headerlink" href="#manual-layer-deployment" title="Link to this heading">¶</a></h5>
 <p>A layer is a lambda component containing re-usable functions. We use it for the code helping to connect to the restful API.</p>
 <p>Package it as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">./</span><span class="n">terraform</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span><span class="o">/</span>
@@ -130,8 +130,9 @@ window.addEventListener("load", () => mermaid.run());
 </div>
 <p>Upload the zip file as a layer in the AWS console.</p>
 </section>
+</section>
 <section id="lambda-functions">
-<h2>Lambda functions<a class="headerlink" href="#lambda-functions" title="Link to this heading">¶</a></h2>
+<h4>Lambda functions<a class="headerlink" href="#lambda-functions" title="Link to this heading">¶</a></h4>
 <p>Terraform is used to deploy the lambda functions.</p>
 <p>Create your deployment environment directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">terraform</span><span class="o">/</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span>
@@ -163,6 +164,8 @@ All those value can be used in a dev venue, only the ops or iac can be used in p
 <span class="n">terraform</span> <span class="n">apply</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
 </pre></div>
 </div>
+</section>
+</section>
 <section id="create-the-api-gateway">
 <h3>Create the API Gateway<a class="headerlink" href="#create-the-api-gateway" title="Link to this heading">¶</a></h3>
 </section>
@@ -201,10 +204,6 @@ All those value can be used in a dev venue, only the ops or iac can be used in p
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#doing-the-installation">Doing the Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#lambda-role">lambda role</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#layer">Layer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#lambda-functions">Lambda functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
