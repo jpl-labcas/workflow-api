@@ -109,7 +109,14 @@ Deploy the lambda functions with terraform:
     terraform init -backend-config=../../../environments/your_tenant_your_venue_dev/terraform.tfvars
     terraform validate
     terraform plan -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
+
+Only locally updated resources will be updated in AWS:
+
     terraform apply -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
+
+To undeploy, as needed:
+
+    terraform destroy -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
 
 
 

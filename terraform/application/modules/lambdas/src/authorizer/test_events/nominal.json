@@ -1,0 +1,6 @@
+{
+  "methodArn": "arn:aws:apigateway:us-west-2::/restapis/tpps808u6l",
+  "headers": {
+    "authorization": "Bearer edited_jwt_token"
+  }
+}
