@@ -142,8 +142,9 @@ Deploy the lambda functions with terraform::
     terraform plan -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
     terraform apply -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
 
+To undeploy, as needed::
 
-
+    terraform destroy -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
 
 
 Create the API Gateway
