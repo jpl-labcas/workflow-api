@@ -1,0 +1,93 @@
+{
+  "resource": "/data-selections/{data_id}/workflows",
+  "path": "/data-selections/nebraska_images/workflows",
+  "httpMethod": "GET",
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "Authorization": "Bearer edited",
+    "Host": "edited.execute-api.us-west-2.amazonaws.com",
+    "origin": "http://localhost",
+    "referer": "http://localhost/",
+    "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+    "X-Amzn-Trace-Id": "Root=1-686c2cff-116f5d9930e42f4c246649d6",
+    "X-Forwarded-For": "128.149.250.69",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "accept": ["*/*"],
+    "accept-encoding": ["gzip, deflate, br, zstd"],
+    "accept-language": ["en-US,en;q=0.9"],
+    "Authorization": [
+      "Bearer edited"
+    ],
+    "Host": ["edited.execute-api.us-west-2.amazonaws.com"],
+    "origin": ["http://localhost"],
+    "referer": ["http://localhost/"],
+    "sec-ch-ua": [
+      "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\""
+    ],
+    "sec-ch-ua-mobile": ["?0"],
+    "sec-ch-ua-platform": ["\"macOS\""],
+    "sec-fetch-dest": ["empty"],
+    "sec-fetch-mode": ["cors"],
+    "sec-fetch-site": ["same-site"],
+    "User-Agent": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+    ],
+    "X-Amzn-Trace-Id": ["Root=1-686c2cff-116f5d9930e42f4c246649d6"],
+    "X-Forwarded-For": ["128.149.250.69"],
+    "X-Forwarded-Port": ["443"],
+    "X-Forwarded-Proto": ["https"]
+  },
+  "multiValueQueryStringParameters": null,
+  "pathParameters": {
+    "data_id": "nebraska_images"
+  },
+  "requestContext": {
+    "resourceId": "561o77",
+    "authorizer": {
+      "principalId": "uid=thomas,dc=edrn,dc=jpl,dc=nasa,dc=gov",
+      "integrationLatency": 2646,
+      "username": "thomas"
+    },
+    "resourcePath": "/data-selections/{collection}/workflows",
+    "httpMethod": "GET",
+    "extendedRequestId": "NWv4BFAKvHcEk2Q=",
+    "requestTime": "07/Jul/2025:20:24:31 +0000",
+    "path": "/dev/data-selections/nebraska_images/workflows",
+    "accountId": "300153749881",
+    "protocol": "HTTP/1.1",
+    "stage": "dev",
+    "domainPrefix": "edited",
+    "requestTimeEpoch": 1751919871722,
+    "requestId": "fba4aacb-efda-4821-b2da-ccd7f1528170",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "edited",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "user": null
+    },
+    "domainName": "edited.execute-api.us-west-2.amazonaws.com",
+    "deploymentId": "edited",
+    "apiId": "edited"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

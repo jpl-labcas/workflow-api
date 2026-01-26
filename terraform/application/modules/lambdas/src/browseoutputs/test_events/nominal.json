@@ -1,0 +1,16 @@
+{
+  "pathParameters": { "prefix": ""},
+  "requestContext": {
+    "resourceId": "njaxmi",
+    "authorizer": {
+      "principalId": "uid=thomas,dc=edrn,dc=jpl,dc=nasa,dc=gov",
+      "integrationLatency": 430,
+      "username": "thomas"
+    }
+  },
+    "stageVariables": {
+    "allowOrigin": "https://edrn-labcas.jpl.nasa.gov/"
+  },
+  "key2": "value2",
+  "key3": "value3"
+}

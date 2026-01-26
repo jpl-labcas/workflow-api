@@ -1,0 +1,41 @@
+{
+  "pathParameters": {
+    "id": "nebraska"
+  },
+  "requestContext": {
+    "resourceId": "njaxmi",
+    "stageVariables": {
+    "allowOrigin": "https://edrn-labcas.jpl.nasa.gov/"
+    },
+    "authorizer": {
+      "principalId": "uid=thomas,dc=edrn,dc=jpl,dc=nasa,dc=gov",
+      "integrationLatency": 430,
+      "username": "thomas"
+    },
+    "resourcePath": "/workflows/{id}/runs",
+    "httpMethod": "POST",
+    "extendedRequestId": "NJyouHV_PHcEfNw=",
+    "requestTime": "03/Jul/2025:22:03:35 +0000",
+    "path": "/dev/workflows/nebraska/runs",
+    "accountId": "300153749881",
+    "protocol": "HTTP/1.1",
+    "stage": "dev",
+    "domainPrefix": "niddmzjv69",
+    "requestTimeEpoch": 1751580215435,
+    "requestId": "dbf96f2b-5dc5-4708-8d63-0fda1509a57c",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "128.149.250.69",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "user": null
+    }
+  }
+}
