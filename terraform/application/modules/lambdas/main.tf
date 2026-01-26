@@ -27,6 +27,7 @@ resource "aws_lambda_layer_version" "layer" {
 module "authorizer_lambda" {
   source      = "../lambda_function"
   api_function_name = "authorizer"
+  maturity    = var.maturity
   layers      = [aws_lambda_layer_version.layer.arn]
   lambda_role_arn = var.lambda_role_arn
   environment_variables = {
@@ -37,6 +38,7 @@ module "authorizer_lambda" {
 module "listruns_lambda" {
   source      = "../lambda_function"
   api_function_name = "listruns"
+  maturity    = var.maturity
   layers      = [aws_lambda_layer_version.layer.arn]
   lambda_role_arn = var.lambda_role_arn
   environment_variables = {
@@ -47,6 +49,7 @@ module "listruns_lambda" {
 module "listworkflows_lambda" {
   source      = "../lambda_function"
   api_function_name = "listworkflows"
+  maturity    = var.maturity
   layers      = [aws_lambda_layer_version.layer.arn]
   lambda_role_arn = var.lambda_role_arn
   environment_variables = {
@@ -58,6 +61,7 @@ module "listworkflows_lambda" {
 module "createrun_lambda" {
   source      = "../lambda_function"
   api_function_name = "createrun"
+  maturity    = var.maturity
   layers      = [aws_lambda_layer_version.layer.arn]
   lambda_role_arn = var.lambda_role_arn
   environment_variables = {
@@ -79,6 +83,29 @@ module "updateoutput_lambda" {
 module "describeworkflow_lambda" {
   source      = "../lambda_function"
   api_function_name = "describeworkflow"
+  maturity    = var.maturity
+  layers      = [aws_lambda_layer_version.layer.arn]
+  lambda_role_arn = var.lambda_role_arn
+  environment_variables = {
+    STAGE = var.stage
+  }
+}
+
+module "browseoutputs_lambda" {
+  source      = "../lambda_function"
+  api_function_name = "browseoutputs"
+  maturity    = var.maturity
+  layers      = [aws_lambda_layer_version.layer.arn]
+  lambda_role_arn = var.lambda_role_arn
+  environment_variables = {
+    STAGE = var.stage
+  }
+}
+
+module "notimplemented_lambda" {
+  source      = "../lambda_function"
+  api_function_name = "notimplemented"
+  maturity    = var.maturity
   layers      = [aws_lambda_layer_version.layer.arn]
   lambda_role_arn = var.lambda_role_arn
   environment_variables = {
