@@ -12,6 +12,10 @@ What you need to install LabCas Workflows is:
 
 * System administrator support to comply with the security constraints defined by your organization.
 * An AWS account with a VPC and private subnets
+* a running MWAA (Managed Workflows for Apache Airflow) environment with a t least on DAG deployed. Some input data for this DAG should be in a S3 bucket (see next item).
+* an S3 bucket where the collection data files are stored
+* an S3 bucket where the output data files are staged.
+* an S3 bucket to store the terraform state files.
 
 Some knowledge of the AWS console and AWS CLI is helpful.
 
@@ -127,12 +131,12 @@ Create a variables file for your deployment configuration in a local file ``terr
     maturity={Maturity level of the deployment (poc: aws console exploration, iac: terraform deployment, ops: full automation with CICD or SA documented procedures)}
     stage={name of a API deployment, stage in AWS API gateway, e.g. dev}
     lambda_role_arn={lambda AM role defined above}
-    aws_region={your AWS regision, e.g. us-west-1}
-    aws_profile={you AWS CLI profile to use}
+    aws_region={your AWS region, e.g. us-west-1}
+    aws_profile={your AWS CLI profile to use}
 
 Maturity aims at avoid naming conflict between different maturity of deployment in the same AWS account.
 The AWS resources created with the terraform script provided contains the chosen maturity value (poc, iac, ops).
-All those value can be used in a dev venue, only the ops or iac can be used in production venues.
+Any of these values can be used in a dev venue, only the ops or iac can be used in production venues. The openapi.yml file provided in the docs refers to the maturity value "iac".
 
 Deploy the lambda functions with terraform::
 
