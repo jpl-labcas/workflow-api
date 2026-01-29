@@ -10,6 +10,8 @@ from session_info import get_session_info
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+AWS_REGION = os.environ.get('REGION')
+MWAA_ENV_NAME = os.environ.get('MWAA_ENV_NAME')
 aws_session_token = os.environ.get('AWS_SESSION_TOKEN')
 
 
@@ -73,7 +75,7 @@ def lambda_handler(event, context):
     region = "us-west-2"
 
     # list the DAGs with the provided arguments
-    dag_list = list_dags(region, mwaa_env_name)["dags"]
+    dag_list = list_dags(AWS_REGION, MWAA_ENV_NAME)["dags"]
 
     # format response
     workflows = [dict(id=dag["dag_id"], description=dag["description"]) for dag in dag_list]
