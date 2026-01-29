@@ -10,6 +10,8 @@ from session_info import get_session_info
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+AWS_REGION = os.environ['REGION']
+MWAA_ENV_NAME = os.environ['MWAA_ENV_NAME']
 OUTPUT_RESULT_API_PATH = 'output-data'
 
 
@@ -97,8 +99,6 @@ def short_run(run, api_output_base_url: str):
 
 
 def lambda_handler(event, context):
-    mwaa_env_name = 'edrn-dev-airflow'  # <-- Change this
-    region = "us-west-2"
 
     logger.debug("event %s", event)
     logger.debug("contet %s", context)
@@ -108,7 +108,7 @@ def lambda_handler(event, context):
     dag_name = event.get("pathParameters", {}).get("id")
 
     # list the DAGs with the provided arguments
-    run_list = list_runs(region, mwaa_env_name, dag_name)["dag_runs"]
+    run_list = list_runs(AWS_REGION, MWAA_ENV_NAME, dag_name)["dag_runs"]
 
     # get username from authorizer context
     requestContext = event.get('requestContext', {})

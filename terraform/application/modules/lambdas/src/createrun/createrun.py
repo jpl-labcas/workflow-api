@@ -8,7 +8,9 @@ from datetime import datetime
 
 from session_info import get_session_info
 
-OUTPUT_BUCKET = "edrn-labcas-workflow-outputs"
+AWS_REGION = os.environ['REGION']
+MWAA_ENV_NAME = os.environ['MWAA_ENV_NAME']
+OUTPUT_BUCKET = os.environ["S3_BUCKET_STAGING"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -22,7 +24,7 @@ def load_config():
     # Retrieve /labcas/workflow/api/config from Parameter Store using extension cache
     parameter_name = "/labcas/workflow/api/config"
     response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
-    logger.debug("launch query to get config fro parameter store")
+    logger.debug("launch query to get config from parameter store")
     config = response['Parameter']['Value']
     return yaml.safe_load(config)
 
@@ -70,8 +72,7 @@ def trigger_dag(region, env_name, dag_name, dag_params):
 
 
 def lambda_handler(event, context):
-    mwaa_env_name = 'edrn-dev-airflow'
-    region = "us-west-2"
+
     try:
         logger.debug(event)
 
@@ -118,7 +119,7 @@ def lambda_handler(event, context):
         dag_params["username"] = username
 
         # Trigger the DAG with the provided arguments
-        response = trigger_dag(region, mwaa_env_name, dag_name, dag_params)
+        response = trigger_dag(AWS_REGION, MWAA_ENV_NAME, dag_name, dag_params)
 
         return {
             "statusCode": 201,
