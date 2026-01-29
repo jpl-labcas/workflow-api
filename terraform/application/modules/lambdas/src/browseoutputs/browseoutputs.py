@@ -3,13 +3,14 @@ import os
 import logging
 import json
 import configparser
+
 config = configparser.ConfigParser()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 s3 = boto3.client('s3')
-BUCKET_NAME = "edrn-labcas-workflow-outputs" # Set in Lambda env vars
+BUCKET_NAME = os.environ["S3_BUCKET_STAGING"] # Set in Lambda env vars
 ROOT_PREFIX = ""
 
 

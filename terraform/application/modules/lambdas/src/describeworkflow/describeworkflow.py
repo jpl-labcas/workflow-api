@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+
 import boto3
 import json
 import requests
@@ -7,6 +9,9 @@ import requests
 from session_info import get_session_info
 
 logging.basicConfig(level=logging.INFO)
+
+AWS_REGION = os.environ['REGION']
+MWAA_ENV_NAME = os.environ['MWAA_ENV_NAME']
 
 
 def info_dag(region, env_name, dag_name):
@@ -52,13 +57,12 @@ def info_dag(region, env_name, dag_name):
 
 def lambda_handler(event, context):
     ## TODO complete implementation
-    mwaa_env_name = 'edrn-dev-airflow'  # <-- Change this
-    region = "us-west-2"
+
     # hardcoded for tests, parameter should come from the path
     dag_name = "nebraska"
 
     # list the DAGs with the provided arguments
-    info_dag = info_dag(region, mwaa_env_name, dag_name)
+    info_dag = info_dag(AWS_REGION, MWAA_ENV_NAME, dag_name)
 
     return {
         "statusCode": 501,

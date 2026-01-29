@@ -12,10 +12,11 @@ What you need to install LabCas Workflows is:
 
 * System administrator support to comply with the security constraints defined by your organization.
 * An AWS account with a VPC and private subnets
-* a running MWAA (Managed Workflows for Apache Airflow) environment with a t least on DAG deployed. Some input data for this DAG should be in a S3 bucket (see next item).
+* a running (MWAA)[https://jpl-labcas.github.io/workflows/install.html#workflow-engine-setup] (Managed Workflows for Apache Airflow) environment with a t least one DAG deployed. Some input data for this DAG should be in a S3 bucket (see next item).
 * an S3 bucket where the collection data files are stored
 * an S3 bucket where the output data files are staged.
 * an S3 bucket to store the terraform state files.
+* a security group allowing the lambda functions to access MWAA and S3 services (outbound access to all traffic is usually allowed by default).
 
 Some knowledge of the AWS console and AWS CLI is helpful.
 
@@ -78,6 +79,13 @@ The YAML content is as follows (update the values as needed)::
       {archive dataset name 1}:
           ...
 
+
+Secrets
+^^^^^^^^
+
+To decode the JWT token used to authenticate the requests as key is needed. Request it from your LabCas Core administrator and store it in the AWS secret manager as a plaintext secret with name ``jwtSecret``.
+Keep the ARN of the secret for the next steps.
+
 lambda role
 ^^^^^^^^^^^
 
@@ -86,9 +94,75 @@ Create an IAM role for the lambda functions with the following policies:
 - AWSLambdaBasicExecutionRole
 - AWSLambdaVPCAccessExecutionRole
 - And a specific policy to access:
-  - MWAA Full: Read Limited: Write
+  - MWAA: Full Read, Limited Write
   - S3 Limited to the staging bucket and archive bucket: List, Read, Write
   - Systems Manager Limited on dedicated config parameter: Read
+  - Secrets Manager Limited on dedicated JWT secret: Read
+
+The custom policy should look like the following (update the ARNs as needed)::
+
+
+  {
+    "Statement": [
+        {
+            "Action": [
+                "airflow:ListEnvironments",
+                "airflow:GetEnvironment",
+                "airflow:ListTagsForResource",
+                "airflow:CreateCliToken"
+            ],
+            "Effect": "Allow",
+            "Resource": "{MWAA environment ARN}"
+        },
+        {
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": "{JWT secret ARN}"
+        },
+        {
+            "Action": [
+                "airflow:InvokeRestApi",
+                "airflow:CreateWebLoginToken"
+            ],
+            "Effect": "Allow",
+            "Resource": "{ARN of the MWAA execution role}/User"
+        },
+        {
+            "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "{ARN for the parameter store parameter /labcas/workflow/api/config}"
+            ]
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::{Staging output bucket name}/*",
+                "arn:aws:s3:::{Staging output bucket name}"
+            ]
+        },
+        {
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:lambda:{your AWS region}:{your account number}:function:labcas*"
+        }
+    ],
+    "Version": "2012-10-17"
+  }
+
+
 
 Layer
 ^^^^^^^^^^^
@@ -124,7 +198,7 @@ Create a terraform state configuration file ``terraform/environments/your_tenant
     # Terraform backend configuration for remote state
     bucket = "<an S3 bucket for your terraform state>"
     key    = "labcas.tfstate"
-    region = "<your AWS regision, e.g. us-west-1>"
+    aws_region = "<your AWS regision, e.g. us-west-1>"
 
 Create a variables file for your deployment configuration in a local file ``terraform/environments/your_tenant_your_venue_dev/variables.tfvars`` with content similar to::
 
@@ -133,6 +207,14 @@ Create a variables file for your deployment configuration in a local file ``terr
     lambda_role_arn={lambda AM role defined above}
     aws_region={your AWS region, e.g. us-west-1}
     aws_profile={your AWS CLI profile to use}
+    jwt_secret_arn={the ARN for JWT key that you stored in AWS Secret Manager, as describe above}
+    s3_bucket_staging={the S3 bucket where the workflow output data is staged}
+    mwaa_env_name={the MWAA environment name where the workflows are deployed}
+    stage={the name of your API deployment}
+    vpc_subnet_ids = ["subnet-private-example1","subnet-private-example2, , see preriquisites above"]
+    vpc_security_group_ids = ["sg-example1, see preriquisites above"]
+
+
 
 Maturity aims at avoid naming conflict between different maturity of deployment in the same AWS account.
 The AWS resources created with the terraform script provided contains the chosen maturity value (poc, iac, ops).

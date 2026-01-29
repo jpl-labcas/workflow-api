@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 s3 = boto3.client('s3')
-BUCKET_NAME = "edrn-labcas-workflow-outputs" # Set in Lambda env vars
+BUCKET_NAME = os.environ.get("S3_BUCKET_STAGING")
 ROOT_PREFIX = ""
 
 def lambda_handler(event, context):
