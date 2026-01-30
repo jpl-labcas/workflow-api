@@ -9,6 +9,7 @@ locals {
 resource "null_resource" "build_trigger" {
   triggers = {
     source_py_hash = filesha256(local.source_file)
+    build_layer_exists = fileexists("${path.module}/build/${local.lambda_name}.zip") ? "yes" : "no"
   }
 }
 

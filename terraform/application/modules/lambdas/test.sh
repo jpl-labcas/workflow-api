@@ -4,7 +4,7 @@ set -euo pipefail
 AWS_REGION="${AWS_REGION:-us-west-1}"
 SRC_DIR="src"
 OUT_DIR="test_outputs"
-MATURITY="iac"
+MATURITY="${MATURITY}"
 
 mkdir -p "$OUT_DIR"
 
@@ -30,7 +30,7 @@ for lambda_dir in "$SRC_DIR"/*; do
     aws lambda invoke \
       --region "$AWS_REGION" \
       --profile "saml-pub" \
-      --function-name "labcas-workflows-$MATURITY-$lambda_name" \
+      --function-name "labcas-${MATURITY}-workflows-$lambda_name" \
       --payload "file://$event_file" \
       "$out_file" \
       --cli-binary-format raw-in-base64-out \

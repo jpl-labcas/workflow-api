@@ -176,7 +176,7 @@ A layer is a lambda component containing re-usable functions. We use it for the 
 
 Package it as follows::
 
-    cd ./terraform/applications/modules/lambdas/
+    cd ./terraform/application/modules/lambdas/
     rm -fr build
     pip install -r requirements.txt -t src/layer/python
     cd src/layer/python
@@ -227,6 +227,14 @@ Deploy the lambda functions with terraform::
     terraform validate
     terraform plan -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
     terraform apply -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
+
+
+Test the deployment with local invocation of the lambda and local test event files provided in the `tests` directory::
+
+    export AWS_REGION={you AWS region, e.g. us-east-1}
+    export MATURITY={the maturity value used in the deployment, e.g. iac}
+    ./test.sh
+
 
 To undeploy, as needed::
 

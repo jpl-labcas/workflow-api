@@ -21,6 +21,7 @@ locals {
 resource "null_resource" "prepare_layer" {
   triggers = {
     files_hash = local.layer_files_hash
+    build_layer_exists = fileexists("${path.module}/build/layer") ? "yes" : "no"
   }
   provisioner "local-exec" {
     command = "rm -fr ${path.module}/build/layer/python && mkdir -p ${path.module}/build/layer/ && cp -r  ${path.module}/src/layer ${path.module}/build/layer/python && pip install -r ${path.module}/build/layer/python/requirements.txt -t ${path.module}/build/layer/python"
