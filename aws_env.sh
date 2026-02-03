@@ -1,0 +1,1 @@
+LAMBDA_ARN_PREFIX="arn:aws:lambda:"
