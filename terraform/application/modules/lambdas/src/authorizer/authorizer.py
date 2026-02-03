@@ -4,12 +4,14 @@ import yaml
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 import boto3
+import os
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 JWT_ALGORITHM = 'HS256'
-REGION_NAME = 'us-west-2'
+REGION_NAME = os.environ['REGION']
+JWT_SECRET_KEY_ARN = os.environ['JWT_SECRET_KEY_ARN']
 
 
 class KeyNotFoundException(Exception):
@@ -60,7 +62,7 @@ def get_authorized_users():
 
 def get_jwt_secret():
     client = boto3.client('secretsmanager', region_name=REGION_NAME)
-    response = client.get_secret_value(SecretId="arn:aws:secretsmanager:us-west-2:300153749881:secret:jwtSecret-CqRUNy")
+    response = client.get_secret_value(SecretId=JWT_SECRET_KEY_ARN)
     if 'SecretString' in response:
         return response['SecretString']
     else:
