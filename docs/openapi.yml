@@ -46,8 +46,8 @@ paths:
       security:
         - labcas-workflow-authorizer: [ ]
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-notimplemented/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-notimplemented/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         responses:
           default:
@@ -105,8 +105,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowlist/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-listworkflows/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         responses:
           default:
@@ -155,8 +155,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowlist/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-listworkflows/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         responses:
           default:
@@ -213,8 +213,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-workflowinfo/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-describeworkflow/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         type: aws_proxy
         requestParameters:
@@ -281,8 +281,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-createrun/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-createrun/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         type: aws_proxy
         requestParameters:
@@ -336,8 +336,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-api-listruns/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-listruns/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         type: aws_proxy
         requestParameters:
@@ -388,8 +388,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-browse-outputs/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-browseoutputs/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         type: aws_proxy
         requestParameters:
@@ -415,8 +415,8 @@ paths:
       security:
         - labcas-workflow-authorizer: []
       x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-update-outputs/invocations
-        credentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+        uri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}-updateoutput/invocations
+        credentials: $LAMBDA_IAM_ROLE
         httpMethod: POST
         type: aws_proxy
         requestParameters:
@@ -451,11 +451,8 @@ components:
         x-amazon-apigateway-authtype: "custom"
         x-amazon-apigateway-authorizer:
           type: "request"
-          authorizerUri: arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-west-2:300153749881:function:labcas-workflows-authorizer/invocations
-          authorizerCredentials: arn:aws:iam::300153749881:role/am-edrn-labcas-lambda-execute-role
+          authorizerUri: arn:aws:apigateway:$AWS_REGION:lambda:path/2015-03-31/functions/${LAMBDA_ARN_PREFIX}labcas-workflows-authorizer/invocations
+          authorizerCredentials: $LAMBDA_IAM_ROLE
           authorizerResultTtlInSeconds: 0
           identitySource: "method.request.header.Authorization"
-
-
-
 

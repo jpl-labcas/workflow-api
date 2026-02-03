@@ -249,7 +249,22 @@ Deploy the API Gateway
 
 Use the AWS console to create a new API gateway (REST API).
 
-Import the file `./docs/openapi.yml` to create the API structure.
+Generate the API structure from the OpenAPI specification template.
+
+Create the following local environment variables::
+
+    export AWS_REGION="<your dployment region>"
+    export LAMBDA_ARN_PREFIX="<the lambda ARN prefix, e.g. arn:aws:lambda:<region>:<account#>:function:labcas-iac->"
+    export LAMBDA_IAM_ROLE="<the lambda execution role ARN created above>"
+
+Use `envsubst` to replace the lambda function ARNs in the OpenAPI specification template file and create a new file to import in the API Gateway::
+
+    envsubst < docs/openapi.yml > docs/openapi.generated.yml
+
+    envsubst < ./docs/openapi.yml > ./docs/openapi-generated.yml
+
+
+Import the file `./docs/openapi-generated.yml` to create the API structure.
 
 This will connect the API endpoints to the lambda functions created above.
 
