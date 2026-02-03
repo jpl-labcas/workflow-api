@@ -75,49 +75,7 @@ Upload the zip file as a layer in the AWS console.
 
 ### Lambda functions
 
-Terraform is used to deploy the lambda functions.
-
-Create your deployment environment directory:
-
-    mkdir terraform/environments/your_tenant_your_venue_dev
-
-Create a terraform state configuration file `terraform/environments/your_tenant_your_venue_dev/terraform.tfvars` with content similar to:
-
-    # Terraform backend configuration for remote state
-    bucket = "<an S3 bucket for your terraform state>"
-    key    = "labcas.tfstate"
-    region = "<your AWS regision, e.g. us-west-1>"   
-
-Create a variables file for your deployment configuration in a local file `terraform/environments/your_tenant_your_venue_dev/variables.tfvars` with content similar to:
-
-    maturity={Maturity level of the deployment (poc: aws console exploration, iac: terraform deployment, ops: full automation with CICD or SA documented procedures)}
-    stage={name of a API deployment, stage in AWS API gateway, e.g. dev}
-    lambda_role_arn={lambda AM role defined above}
-    aws_region={your AWS regision, e.g. us-west-1}
-    aws_profile={you AWS CLI profile to use}
-
-Maturity aims at avoid naming conflict between different maturity of deployment in the same AWS account.
-The AWS resources created with the terraform script provided contains the chosen maturity value (poc, iac, ops).
-All those value can be used in a dev venue, only the ops or iac can be used in production venues.
-
-
-Deploy the lambda functions with terraform:
-
-    
-
-    cd terraform/application/modules/lambdas
-    terraform init -backend-config=../../../environments/your_tenant_your_venue_dev/terraform.tfvars
-    terraform validate
-    terraform plan -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
-    terraform apply -var-file=../../../environments/your_tenant_your_venue_dev/variables.tfvars
-
-
-
-## Test the API
-
-A demo UI is provided to demonstrate the API features.
-
-Follow instructions in the (workflow-api-client-demo repository)[https://github.com/jpl-labcas/workflow-api-client-demo]
+See doc in gh-pages, install page.
 
 
 ## Generate doc manually

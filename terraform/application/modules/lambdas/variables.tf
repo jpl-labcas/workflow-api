@@ -23,3 +23,32 @@ variable "stage" {
   type        = string
 }
 
+variable "s3_bucket_staging" {
+    description = "S3 bucket for staging"
+    type        = string
+}
+
+variable "mwaa_env_name" {
+    description = "MWAA environment name"
+    type        = string
+}
+
+variable "jwt_secret_arn" {
+    description = "ARN of the JWT secret in AWS Secrets Manager"
+    type        = string
+}
+
+variable "vpc_subnet_ids" {
+  description = "List of subnet IDs for Lambda VPC config."
+  type        = list(string)
+  default     = []
+}
+
+variable "vpc_security_group_ids" {
+  description = "List of security group IDs for Lambda VPC config."
+  type        = list(string)
+  default     = []
+}
+
+
+
