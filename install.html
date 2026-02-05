@@ -51,6 +51,11 @@ window.addEventListener("load", () => mermaid.run());
 <ul class="simple">
 <li><p>System administrator support to comply with the security constraints defined by your organization.</p></li>
 <li><p>An AWS account with a VPC and private subnets</p></li>
+<li><p>a running (MWAA)[<a class="reference external" href="https://jpl-labcas.github.io/workflows/install.html#workflow-engine-setup">https://jpl-labcas.github.io/workflows/install.html#workflow-engine-setup</a>] (Managed Workflows for Apache Airflow) environment with a t least one DAG deployed. Some input data for this DAG should be in a S3 bucket (see next item).</p></li>
+<li><p>an S3 bucket where the collection data files are stored</p></li>
+<li><p>an S3 bucket where the output data files are staged.</p></li>
+<li><p>an S3 bucket to store the terraform state files.</p></li>
+<li><p>a security group allowing the lambda functions to access MWAA and S3 services (outbound access to all traffic is usually allowed by default).</p></li>
 </ul>
 <p>Some knowledge of the AWS console and AWS CLI is helpful.</p>
 </section>
@@ -102,6 +107,11 @@ window.addEventListener("load", () => mermaid.run());
 </pre></div>
 </div>
 </section>
+<section id="secrets">
+<h4>Secrets<a class="headerlink" href="#secrets" title="Link to this heading">¶</a></h4>
+<p>To decode the JWT token used to authenticate the requests as key is needed. Request it from your LabCas Core administrator and store it in the AWS secret manager as a plaintext secret with name <code class="docutils literal notranslate"><span class="pre">jwtSecret</span></code>.
+Keep the ARN of the secret for the next steps.</p>
+</section>
 <section id="lambda-role">
 <h4>lambda role<a class="headerlink" href="#lambda-role" title="Link to this heading">¶</a></h4>
 <p>Create an IAM role for the lambda functions with the following policies:</p>
@@ -109,10 +119,73 @@ window.addEventListener("load", () => mermaid.run());
 <li><p>AWSLambdaBasicExecutionRole</p></li>
 <li><p>AWSLambdaVPCAccessExecutionRole</p></li>
 <li><p>And a specific policy to access:
-- MWAA Full: Read Limited: Write
+- MWAA: Full Read, Limited Write
 - S3 Limited to the staging bucket and archive bucket: List, Read, Write
-- Systems Manager Limited on dedicated config parameter: Read</p></li>
+- Systems Manager Limited on dedicated config parameter: Read
+- Secrets Manager Limited on dedicated JWT secret: Read</p></li>
 </ul>
+<p>The custom policy should look like the following (update the ARNs as needed):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;Statement&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;airflow:ListEnvironments&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;airflow:GetEnvironment&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;airflow:ListTagsForResource&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;airflow:CreateCliToken&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="s2">&quot;{MWAA environment ARN}&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;secretsmanager:GetSecretValue&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="s2">&quot;{JWT secret ARN}&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;airflow:InvokeRestApi&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;airflow:CreateWebLoginToken&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="s2">&quot;{ARN of the MWAA execution role}/User&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;ssm:GetParameters&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;ssm:GetParameter&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;{ARN for the parameter store parameter /labcas/workflow/api/config}&quot;</span>
+          <span class="p">]</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;s3:GetObject&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;s3:ListBucket&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;s3:PutObject&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;arn:aws:s3:::{Staging output bucket name}/*&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;arn:aws:s3:::{Staging output bucket name}&quot;</span>
+          <span class="p">]</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="s2">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="s2">&quot;lambda:InvokeFunction&quot;</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;Resource&quot;</span><span class="p">:</span> <span class="s2">&quot;arn:aws:lambda:{your AWS region}:{your account number}:function:labcas*&quot;</span>
+      <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="s2">&quot;Version&quot;</span><span class="p">:</span> <span class="s2">&quot;2012-10-17&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </section>
 <section id="layer">
 <h4>Layer<a class="headerlink" href="#layer" title="Link to this heading">¶</a></h4>
@@ -121,7 +194,7 @@ window.addEventListener("load", () => mermaid.run());
 <h5>Manual layer deployment<a class="headerlink" href="#manual-layer-deployment" title="Link to this heading">¶</a></h5>
 <p>A layer is a lambda component containing re-usable functions. We use it for the code helping to connect to the restful API.</p>
 <p>Package it as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">./</span><span class="n">terraform</span><span class="o">/</span><span class="n">applications</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span><span class="o">/</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">./</span><span class="n">terraform</span><span class="o">/</span><span class="n">application</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span><span class="o">/</span>
 <span class="n">rm</span> <span class="o">-</span><span class="n">fr</span> <span class="n">build</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">t</span> <span class="n">src</span><span class="o">/</span><span class="n">layer</span><span class="o">/</span><span class="n">python</span>
 <span class="n">cd</span> <span class="n">src</span><span class="o">/</span><span class="n">layer</span><span class="o">/</span><span class="n">python</span>
@@ -142,26 +215,42 @@ window.addEventListener("load", () => mermaid.run());
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Terraform backend configuration for remote state</span>
 <span class="n">bucket</span> <span class="o">=</span> <span class="s2">&quot;&lt;an S3 bucket for your terraform state&gt;&quot;</span>
 <span class="n">key</span>    <span class="o">=</span> <span class="s2">&quot;labcas.tfstate&quot;</span>
-<span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;&lt;your AWS regision, e.g. us-west-1&gt;&quot;</span>
+<span class="n">aws_region</span> <span class="o">=</span> <span class="s2">&quot;&lt;your AWS regision, e.g. us-west-1&gt;&quot;</span>
 </pre></div>
 </div>
 <p>Create a variables file for your deployment configuration in a local file <code class="docutils literal notranslate"><span class="pre">terraform/environments/your_tenant_your_venue_dev/variables.tfvars</span></code> with content similar to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">maturity</span><span class="o">=</span><span class="p">{</span><span class="n">Maturity</span> <span class="n">level</span> <span class="n">of</span> <span class="n">the</span> <span class="n">deployment</span> <span class="p">(</span><span class="n">poc</span><span class="p">:</span> <span class="n">aws</span> <span class="n">console</span> <span class="n">exploration</span><span class="p">,</span> <span class="n">iac</span><span class="p">:</span> <span class="n">terraform</span> <span class="n">deployment</span><span class="p">,</span> <span class="n">ops</span><span class="p">:</span> <span class="n">full</span> <span class="n">automation</span> <span class="k">with</span> <span class="n">CICD</span> <span class="ow">or</span> <span class="n">SA</span> <span class="n">documented</span> <span class="n">procedures</span><span class="p">)}</span>
 <span class="n">stage</span><span class="o">=</span><span class="p">{</span><span class="n">name</span> <span class="n">of</span> <span class="n">a</span> <span class="n">API</span> <span class="n">deployment</span><span class="p">,</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">AWS</span> <span class="n">API</span> <span class="n">gateway</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">dev</span><span class="p">}</span>
 <span class="n">lambda_role_arn</span><span class="o">=</span><span class="p">{</span><span class="k">lambda</span> <span class="n">AM</span> <span class="n">role</span> <span class="n">defined</span> <span class="n">above</span><span class="p">}</span>
-<span class="n">aws_region</span><span class="o">=</span><span class="p">{</span><span class="n">your</span> <span class="n">AWS</span> <span class="n">regision</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">us</span><span class="o">-</span><span class="n">west</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
-<span class="n">aws_profile</span><span class="o">=</span><span class="p">{</span><span class="n">you</span> <span class="n">AWS</span> <span class="n">CLI</span> <span class="n">profile</span> <span class="n">to</span> <span class="n">use</span><span class="p">}</span>
+<span class="n">aws_region</span><span class="o">=</span><span class="p">{</span><span class="n">your</span> <span class="n">AWS</span> <span class="n">region</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">us</span><span class="o">-</span><span class="n">west</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<span class="n">aws_profile</span><span class="o">=</span><span class="p">{</span><span class="n">your</span> <span class="n">AWS</span> <span class="n">CLI</span> <span class="n">profile</span> <span class="n">to</span> <span class="n">use</span><span class="p">}</span>
+<span class="n">jwt_secret_arn</span><span class="o">=</span><span class="p">{</span><span class="n">the</span> <span class="n">ARN</span> <span class="k">for</span> <span class="n">JWT</span> <span class="n">key</span> <span class="n">that</span> <span class="n">you</span> <span class="n">stored</span> <span class="ow">in</span> <span class="n">AWS</span> <span class="n">Secret</span> <span class="n">Manager</span><span class="p">,</span> <span class="k">as</span> <span class="n">describe</span> <span class="n">above</span><span class="p">}</span>
+<span class="n">s3_bucket_staging</span><span class="o">=</span><span class="p">{</span><span class="n">the</span> <span class="n">S3</span> <span class="n">bucket</span> <span class="n">where</span> <span class="n">the</span> <span class="n">workflow</span> <span class="n">output</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">staged</span><span class="p">}</span>
+<span class="n">mwaa_env_name</span><span class="o">=</span><span class="p">{</span><span class="n">the</span> <span class="n">MWAA</span> <span class="n">environment</span> <span class="n">name</span> <span class="n">where</span> <span class="n">the</span> <span class="n">workflows</span> <span class="n">are</span> <span class="n">deployed</span><span class="p">}</span>
+<span class="n">stage</span><span class="o">=</span><span class="p">{</span><span class="n">the</span> <span class="n">name</span> <span class="n">of</span> <span class="n">your</span> <span class="n">API</span> <span class="n">deployment</span><span class="p">}</span>
+<span class="n">vpc_subnet_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;subnet-private-example1&quot;</span><span class="p">,</span><span class="s2">&quot;subnet-private-example2, , see preriquisites above&quot;</span><span class="p">]</span>
+<span class="n">vpc_security_group_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sg-example1, see preriquisites above&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Maturity aims at avoid naming conflict between different maturity of deployment in the same AWS account.
 The AWS resources created with the terraform script provided contains the chosen maturity value (poc, iac, ops).
-All those value can be used in a dev venue, only the ops or iac can be used in production venues.</p>
+Any of these values can be used in a dev venue, only the ops or iac can be used in production venues. The openapi.yml file provided in the docs refers to the maturity value “iac”.</p>
 <p>Deploy the lambda functions with terraform:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">terraform</span><span class="o">/</span><span class="n">application</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">lambdas</span>
 <span class="n">terraform</span> <span class="n">init</span> <span class="o">-</span><span class="n">backend</span><span class="o">-</span><span class="n">config</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">terraform</span><span class="o">.</span><span class="n">tfvars</span>
 <span class="n">terraform</span> <span class="n">validate</span>
 <span class="n">terraform</span> <span class="n">plan</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
 <span class="n">terraform</span> <span class="n">apply</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
+</pre></div>
+</div>
+<p>Test the deployment with local invocation of the lambda and local test event files provided in the <cite>tests</cite> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">AWS_REGION</span><span class="o">=</span><span class="p">{</span><span class="n">you</span> <span class="n">AWS</span> <span class="n">region</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<span class="n">export</span> <span class="n">MATURITY</span><span class="o">=</span><span class="p">{</span><span class="n">the</span> <span class="n">maturity</span> <span class="n">value</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">deployment</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">iac</span><span class="p">}</span>
+<span class="o">./</span><span class="n">test</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>To undeploy, as needed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">terraform</span> <span class="n">destroy</span> <span class="o">-</span><span class="n">var</span><span class="o">-</span><span class="n">file</span><span class="o">=../../../</span><span class="n">environments</span><span class="o">/</span><span class="n">your_tenant_your_venue_dev</span><span class="o">/</span><span class="n">variables</span><span class="o">.</span><span class="n">tfvars</span>
 </pre></div>
 </div>
 </section>
@@ -171,7 +260,20 @@ All those value can be used in a dev venue, only the ops or iac can be used in p
 <section id="deploy-the-api-gateway">
 <h4>Deploy the API Gateway<a class="headerlink" href="#deploy-the-api-gateway" title="Link to this heading">¶</a></h4>
 <p>Use the AWS console to create a new API gateway (REST API).</p>
-<p>Import the file <cite>./docs/openapi.yml</cite> to create the API structure.</p>
+<p>Generate the API structure from the OpenAPI specification template.</p>
+<p>Create the following local environment variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">AWS_REGION</span><span class="o">=</span><span class="s2">&quot;&lt;your dployment region&gt;&quot;</span>
+<span class="n">export</span> <span class="n">LAMBDA_ARN_PREFIX</span><span class="o">=</span><span class="s2">&quot;&lt;the lambda ARN prefix, e.g. arn:aws:lambda:&lt;region&gt;:&lt;account#&gt;:function:labcas-iac-&gt;&quot;</span>
+<span class="n">export</span> <span class="n">LAMBDA_IAM_ROLE</span><span class="o">=</span><span class="s2">&quot;&lt;the lambda execution role ARN created above&gt;&quot;</span>
+</pre></div>
+</div>
+<p>Use <cite>envsubst</cite> to replace the lambda function ARNs in the OpenAPI specification template file and create a new file to import in the API Gateway:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">envsubst</span> <span class="o">&lt;</span> <span class="n">docs</span><span class="o">/</span><span class="n">openapi</span><span class="o">.</span><span class="n">yml</span> <span class="o">&gt;</span> <span class="n">docs</span><span class="o">/</span><span class="n">openapi</span><span class="o">.</span><span class="n">generated</span><span class="o">.</span><span class="n">yml</span>
+
+<span class="n">envsubst</span> <span class="o">&lt;</span> <span class="o">./</span><span class="n">docs</span><span class="o">/</span><span class="n">openapi</span><span class="o">.</span><span class="n">yml</span> <span class="o">&gt;</span> <span class="o">./</span><span class="n">docs</span><span class="o">/</span><span class="n">openapi</span><span class="o">-</span><span class="n">generated</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>Import the file <cite>./docs/openapi-generated.yml</cite> to create the API structure.</p>
 <p>This will connect the API endpoints to the lambda functions created above.</p>
 </section>
 <section id="test-the-api">
